@@ -87,7 +87,7 @@ reversing strings as you type.
 =head2 SEE ALSO
 
 This application was used as part of the presentation given on the
-Barcelona Perl & Friends conference (aka Barcelona Perl Workshop 2017)
+Barcelona Perl & Friends conference (aka Barcelona Perl Workshop 2017).
 
 =head1 AUTHOR
 
