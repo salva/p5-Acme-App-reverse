@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Acme-App-reverse.t
+lib/Acme/App/reverse.pm
