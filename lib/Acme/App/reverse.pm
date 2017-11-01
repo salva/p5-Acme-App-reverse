@@ -2,14 +2,14 @@ package Acme::App::reverse;
 
 our $VERSION = '0.01';
 
-use 5.026;
+use 5.024;
 
 use strict;
 use warnings;
 use feature qw(signatures);
 no warnings qw(experimental::signatures);
 
-use Wx;
+use Wx qw(wxBITMAP_TYPE_ICO);
 use Wx::Event qw(:everything);
 use Wx::XRC;
 use Path::Tiny;
@@ -19,9 +19,15 @@ sub new {
     my $app = Wx::SimpleApp->new;
     my $xrc = Wx::XmlResource->new();
     $xrc->InitAllHandlers;
-    my $xrc_fn = path($0)->absolute->parent->parent->child('xrc', 'reverse.xrc');
+    my $xrc_fn = path($0)->absolute->parent->child('xrc', 'reverse.xrc');
     $xrc->Load("$xrc_fn");
     my $frame = $xrc->LoadFrame(undef, 'main_frame');
+
+    if ($^O eq 'MSWin32') {
+        my $icon = Wx::Icon->new(path($0)->absolute->parent->child('reverse.ico')->canonpath,
+                                 wxBITMAP_TYPE_ICO);
+        $frame->SetIcon($icon);
+    }
 
     my $ctrl1_id = Wx::XmlResource::GetXRCID('text_ctrl_1');
     my $ctrl2_id = Wx::XmlResource::GetXRCID('text_ctrl_2');
