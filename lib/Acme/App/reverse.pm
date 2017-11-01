@@ -1,76 +1,97 @@
 package Acme::App::reverse;
 
-use 5.026000;
-use strict;
-use warnings;
-
-require Exporter;
-
-our @ISA = qw(Exporter);
-
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
-
-# This allows declaration	use Acme::App::reverse ':all';
-# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
-# will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(
-	
-) ] );
-
-our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
-
-our @EXPORT = qw(
-	
-);
-
 our $VERSION = '0.01';
 
+use 5.026;
 
-# Preloaded methods go here.
+use strict;
+use warnings;
+use feature qw(signatures);
+no warnings qw(experimental::signatures);
+
+use Wx;
+use Wx::Event qw(:everything);
+use Wx::XRC;
+use Path::Tiny;
+
+sub new {
+    my $class = shift;
+    my $app = Wx::SimpleApp->new;
+    my $xrc = Wx::XmlResource->new();
+    $xrc->InitAllHandlers;
+    my $xrc_fn = path($0)->absolute->parent->parent->child('xrc', 'reverse.xrc');
+    $xrc->Load("$xrc_fn");
+    my $frame = $xrc->LoadFrame(undef, 'main_frame');
+
+    my $ctrl1_id = Wx::XmlResource::GetXRCID('text_ctrl_1');
+    my $ctrl2_id = Wx::XmlResource::GetXRCID('text_ctrl_2');
+    my $ctrl1 = $frame->FindWindow($ctrl1_id);
+    my $ctrl2 = $frame->FindWindow($ctrl2_id);
+
+    my $last_v = $ctrl1->GetValue;
+
+    my $self = { app => $app,
+                 xrc => $xrc,
+                 frame => $frame,
+                 ctrl1_id => $ctrl1_id,
+                 ctrl2_id => $ctrl2_id,
+                 ctrl1 => $ctrl1,
+                 ctrl2 => $ctrl2,
+                 last_v => \$last_v };
+
+    EVT_TEXT($frame, $ctrl1_id, sub {
+                 my $v = $ctrl1->GetValue;
+                 if ($v ne $last_v) {
+                     $last_v = $v;
+                     my $rv = reverse $v;
+                     warn "$v => $rv\n";
+                     $ctrl2->SetValue($rv)
+                 }
+             });
+
+    EVT_TEXT($frame, $ctrl2_id, sub {
+                 my $rv = $ctrl2->GetValue;
+                 my $v = reverse $rv;
+                 if ($v ne $last_v) {
+                     $last_v = $v;
+                     warn "$rv => $v\n";
+                     $ctrl1->SetValue($v)
+                 }
+             });
+
+    bless $self, $class;
+}
+
+sub run ($self) {
+    $self->{frame}->Show;
+    $self->{app}->MainLoop;
+}
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
-Acme::App::reverse - Perl extension for blah blah blah
+Acme::App::reverse - Perl graphical application for reversing strings
 
 =head1 SYNOPSIS
 
-  use Acme::App::reverse;
-  blah blah blah
+  my $app = Acme::App::Reverse->new;
+  $app->run;
 
 =head1 DESCRIPTION
 
-Stub documentation for Acme::App::reverse, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+This incredible application provides an user friendly interface for
+reversing strings as you type.
 
-Blah blah blah.
+=head2 SEE ALSO
 
-=head2 EXPORT
-
-None by default.
-
-
-
-=head1 SEE ALSO
-
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+This application was used as part of the presentation given on the
+Barcelona Perl & Friends conference (aka Barcelona Perl Workshop 2017)
 
 =head1 AUTHOR
 
-Salvador Fandiño, E<lt>salva@E<gt>
+Salvador Fandiño, E<lt>sfandino@yahoo.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
